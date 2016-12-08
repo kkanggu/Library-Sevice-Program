@@ -7,6 +7,7 @@ int main ()
 	int iNum = 0 ;
 	int iMenu = 0 ;
 	bool bKeep = true ;
+	extern Client * pUser ;
 	
 	pClientHead = ( Client * ) malloc ( sizeof ( Client ) ) ;
 	pClientTail = ( Client * ) malloc ( sizeof ( Client ) ) ;
@@ -58,21 +59,21 @@ int main ()
 	File_Load ( fBorrow , 3 ) ;
 	fclose ( fBorrow ) ;
 
-	ServiceMenu_Print () ;
 
 
 	while ( bKeep )
 	{
-		printf ( "선택할 기능을 입력하세요 : " ) ;
-
-
-		scanf ( "%d" , & iInput ) ;
-
-		fflush ( stdin ) ;
-
-
 		if ( 0 == iMenu )
 		{
+			ServiceMenu_Print () ;
+			printf ( "선택할 기능을 입력하세요 : " ) ;
+
+
+			scanf ( "%d" , & iInput ) ;
+
+			fflush ( stdin ) ;
+
+
 			switch ( iInput )
 			{
 				case 1 :
@@ -89,12 +90,10 @@ int main ()
 						ServiceMenu_Print () ;
 					else if ( pClientHead == pUser )
 					{
-						ServiceAdmin_Print () ;
 						iMenu = 1 ;
 					}
 					else
 					{
-						ServiceUser_Print () ;
 						iMenu = 2 ;
 					}
 
@@ -109,13 +108,93 @@ int main ()
 		}
 		else if ( 1 == iMenu )
 		{
+			ServiceAdmin_Print () ;
+
+			printf ( "선택할 기능을 입력하세요 : " ) ;
+
+			scanf ( "%d" , & iInput ) ;
+
+			fflush ( stdin ) ;
+
+
 			switch ( iInput )
 			{
-				
+				case 1 :
+					Register_Book () ;
+
+					break ;
+				case 2 :
+					Eliminate_Book () ;
+					
+					break ;
+				case 3 :
+					Borrow_Book () ;
+					
+					break ;
+				case 4 :
+					Return_Book () ;
+					
+					break ;
+				case 5 :
+					Print_Book_Information ( Search_Book ( 0 , false ) ) ;
+					
+					break ;
+				case 6 :
+					Search_Client ( ) ;
+					
+					break ;
+				case 7 :
+					Logout_Member () ;
+					iMenu = 0 ;
+					
+					break ;
+				case 8 :
+					bKeep = false ;
+					
+					break ;
 			}
 		}
 		else
 		{
+			ServiceUser_Print () ;
+			
+			
+			printf ( "선택할 기능을 입력하세요 : " ) ;
+
+			scanf ( "%d" , & iInput ) ;
+
+			fflush ( stdin ) ;
+
+
+			switch ( iInput )
+			{
+				case 1 :
+					Print_Book_Information ( Search_Book ( 0 , false ) ) ;
+
+					break ;
+				case 2 :
+					My_Borrow_List () ;
+
+					break ;
+				case 3 :
+					Modify_Member () ;
+					
+					break ;
+				case 4 :
+					Quit_Member () ;
+					iMenu = 0 ;
+
+					break ;
+				case 5 :
+					Logout_Member () ;
+					iMenu = 0 ;
+					
+					break ;
+				case 6 :
+					bKeep = false ;
+					
+					break ;
+			}
 
 		}
 
@@ -181,8 +260,6 @@ int main ()
 	fclose ( fBook ) ;
 	fclose ( fBorrow ) ;
 
-	All_free ( pClientHead ) ;
-	All_free ( pBookHead ) ;
-	All_free ( pBorrowHead ) ;
+	All_free () ;
 }
 

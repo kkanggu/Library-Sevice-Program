@@ -5,6 +5,7 @@ int iClientCount = 0 ;
 int iBookCount = 0 ;
 int iBorrowCount = 0 ;
 int iBookNum = 0 ;
+Client * pUser = NULL ;				// Login. NULL is noOne, ClientHead is admin. Other people, that people login.
 
 
 /*
@@ -12,6 +13,11 @@ int iBookNum = 0 ;
  */
 void File_Load ( FILE * fFile , int iFileCheck )
 {
+	Client * pClientNode = NULL ;
+	Client * pClientSort = NULL ;
+	Book * pBookNode = NULL ;
+	Book * pBookSort = NULL ;
+	Borrow * pBorrowNode = NULL ;
 	int i = 0 ;
 	int iStartIndex = 0 ;
 	int iTemp = 0 ;
@@ -23,16 +29,9 @@ void File_Load ( FILE * fFile , int iFileCheck )
 	{
 		while ( ( NULL != fFile ) && ( fgets ( cTemp , 149 , fFile ) ) )
 		{
-			pClientTail -> m_pPrev -> m_pNext = ( Client * ) malloc ( sizeof ( Client ) ) ;							// pNode -> m_pNext = pNew
-
-
-			pClientTail -> m_pPrev -> m_pNext -> m_pNext = pClientTail ;											// pNew -> m_pNext = pTail
-			pClientTail -> m_pPrev -> m_pNext -> m_pPrev = pClientTail -> m_pPrev ;									// pNew -> m_pPrev = pNode
-			pClientTail -> m_pPrev = pClientTail -> m_pPrev -> m_pNext ;											// pTail -> m_pPrev = pNew
-
-
+			pClientNode = ( Client * ) malloc ( sizeof ( Client ) ) ;							// pNode -> m_pNext = pNew
 			Copy_Nto0 ( cTemp , cInfo , 0 , 0 , 8 ) ;
-			pClientTail -> m_pPrev -> m_iStudentNum = atoi ( cInfo ) ;
+			pClientNode -> m_iStudentNum = atoi ( cInfo ) ;
 
 			i = 11 ;
 			iStartIndex = 11 ;
@@ -47,9 +46,11 @@ void File_Load ( FILE * fFile , int iFileCheck )
 				if ( ( ' ' == cTemp [ i - 2 ] ) && ( '|' == cTemp [ i - 1  ] ) && ( ' ' == cTemp [ i ] ) && ( 0 == iTemp ) )
 				{
 //					cTemp [ i - 1 ] = '\0' ;
+					//Copy_Nto0 ( cTemp , pClientNode -> m_cPassword , iStartIndex , 0 , i - iStartIndex - 2 ) ;
 					Copy_Nto0 ( cTemp , cInfo , iStartIndex , 0 , i - iStartIndex - 2 ) ;
-					pClientTail -> m_pPrev -> m_cPassword = ( char * ) malloc ( sizeof ( char ) * strlen ( cInfo ) ) ;
-					strcpy ( pClientTail -> m_pPrev -> m_cPassword , cInfo ) ;
+					pClientNode -> m_cPassword = ( char * ) malloc ( sizeof ( char ) * ( strlen ( cInfo ) + 1 ) ) ;
+					strncpy ( pClientNode -> m_cPassword , cInfo , strlen ( cInfo ) ) ;
+					pClientNode -> m_cPassword [ strlen ( cInfo ) ] = '\0' ;
 					iStartIndex = i + 1 ;
 					++ iTemp ;
 					++ i ;
@@ -57,9 +58,11 @@ void File_Load ( FILE * fFile , int iFileCheck )
 				else if ( ( ' ' == cTemp [ i - 2 ] ) && ( '|' == cTemp [ i - 1  ] ) && ( ' ' == cTemp [ i ] ) && ( 1 == iTemp ) )
 				{
 //					cTemp [ i - 1 ] = '\0' ;
+					//Copy_Nto0 ( cTemp , pClientNode -> m_cName , iStartIndex , 0 , i - iStartIndex - 2 ) ;
 					Copy_Nto0 ( cTemp , cInfo , iStartIndex , 0 , i - iStartIndex - 2 ) ;
-					pClientTail -> m_pPrev -> m_cName = ( char * ) malloc ( sizeof ( char ) * strlen ( cInfo ) ) ;
-					strcpy ( pClientTail -> m_pPrev -> m_cName , cInfo ) ;
+					pClientNode -> m_cName = ( char * ) malloc ( sizeof ( char ) * ( strlen ( cInfo ) + 1 ) ) ;
+					strncpy ( pClientNode -> m_cName , cInfo , strlen ( cInfo ) ) ;
+					pClientNode -> m_cName [ strlen ( cInfo ) ] = '\0' ;
 					iStartIndex = i + 1 ;
 					++ iTemp ;
 					++ i ;
@@ -67,9 +70,11 @@ void File_Load ( FILE * fFile , int iFileCheck )
 				else if ( ( ' ' == cTemp [ i - 2 ] ) && ( '|' == cTemp [ i - 1  ] ) && ( ' ' == cTemp [ i ] ) && ( 2 == iTemp ) )
 				{
 //					cTemp [ i - 1 ] = '\0' ;
+					//Copy_Nto0 ( cTemp , pClientNode -> m_cAddress , iStartIndex , 0 , i - iStartIndex - 2 ) ;
 					Copy_Nto0 ( cTemp , cInfo , iStartIndex , 0 , i - iStartIndex - 2 ) ;
-					pClientTail -> m_pPrev -> m_cAddress = ( char * ) malloc ( sizeof ( char ) * strlen ( cInfo ) ) ;
-					strcpy ( pClientTail -> m_pPrev -> m_cAddress , cInfo ) ;
+					pClientNode -> m_cAddress = ( char * ) malloc ( sizeof ( char ) * ( strlen ( cInfo ) + 1 ) ) ;
+					strncpy ( pClientNode -> m_cAddress , cInfo , strlen ( cInfo ) ) ;
+					pClientNode -> m_cAddress [ strlen ( cInfo ) ] = '\0' ;
 					iStartIndex = i + 1 ;
 					++ iTemp ;
 					++ i ;
@@ -77,14 +82,29 @@ void File_Load ( FILE * fFile , int iFileCheck )
 				else if ( ( '\n' == cTemp [ i ] ) && ( 3 == iTemp ) )
 				{
 //					cTemp [ i - 1 ] = '\0' ;
-					Copy_Nto0 ( cTemp , cInfo , iStartIndex , 0 , i - iStartIndex - 2 ) ;
-					pClientTail -> m_pPrev -> m_cNumber = ( char * ) malloc ( sizeof ( char ) * strlen ( cInfo ) ) ;
-					strcpy ( pClientTail -> m_pPrev -> m_cNumber , cInfo ) ;
+					//Copy_Nto0 ( cTemp , pClientNode -> m_cNumber , iStartIndex , 0 , i - iStartIndex - 2 ) ;
+					Copy_Nto0 ( cTemp , cInfo , iStartIndex , 0 , i - iStartIndex ) ;
+					pClientNode -> m_cNumber = ( char * ) malloc ( sizeof ( char ) * ( strlen ( cInfo ) + 1 ) ) ;
+					strncpy ( pClientNode -> m_cNumber , cInfo , strlen ( cInfo ) ) ;
+					pClientNode -> m_cNumber [ strlen ( cInfo ) ] = '\0' ;
 //					iStartIndex = i + 1 ;
 //					++ iTemp ;
 //					++ i ;
 				}
 			}
+
+
+			pClientSort = Sort_StudentNum_Find_Member ( pClientNode ) ;
+
+			pClientSort -> m_pNext -> m_pPrev = pClientNode ;
+			pClientNode -> m_pNext = pClientSort -> m_pNext ;
+			pClientSort -> m_pNext = pClientNode ;
+			pClientNode -> m_pPrev = pClientSort ;
+
+
+//			pClientTail -> m_pPrev -> m_pNext -> m_pNext = pClientTail ;											// pNew -> m_pNext = pTail
+//			pClientTail -> m_pPrev -> m_pNext -> m_pPrev = pClientTail -> m_pPrev ;									// pNew -> m_pPrev = pNode
+//			pClientTail -> m_pPrev = pClientTail -> m_pPrev -> m_pNext ;											// pTail -> m_pPrev = pNew
 
 			
 			++ iClientCount ;
@@ -94,20 +114,13 @@ void File_Load ( FILE * fFile , int iFileCheck )
 	{
 		while ( ( NULL != fFile ) && ( fgets ( cTemp , 149 , fFile ) ) )
 		{
-			pBookTail -> m_pPrev -> m_pNext = ( Client * ) malloc ( sizeof ( Client ) ) ;							// pNode -> m_pNext = pNew
-
-
-			pBookTail -> m_pPrev -> m_pNext -> m_pNext = pBookTail ;											// pNew -> m_pNext = pTail
-			pBookTail -> m_pPrev -> m_pNext -> m_pPrev = pBookTail -> m_pPrev ;									// pNew -> m_pPrev = pNode
-			pBookTail -> m_pPrev = pBookTail -> m_pPrev -> m_pNext ;											// pTail -> m_pPrev = pNew
-
-
+			pBookNode = ( Book * ) malloc ( sizeof ( Book ) ) ;							// pNode -> m_pNext = pNew
 			Copy_Nto0 ( cTemp , cInfo , 0 , 0 , 7 ) ;
-			pBookTail -> m_pPrev -> m_iBookNum = atoi ( cInfo ) ;
+			pBookNode -> m_iBookNum = atoi ( cInfo ) ;
 
 
-			if ( pBookTail -> m_pPrev -> m_iBookNum > iBookNum )
-				iBookNum = pBookTail -> m_pPrev -> m_iBookNum ;
+			if ( pBookNode -> m_iBookNum > iBookNum )
+				iBookNum = pBookNode -> m_iBookNum ;
 
 			i = 10 ;
 			iStartIndex = 10 ;
@@ -122,9 +135,11 @@ void File_Load ( FILE * fFile , int iFileCheck )
 				if ( ( ' ' == cTemp [ i - 2 ] ) && ( '|' == cTemp [ i - 1  ] ) && ( ' ' == cTemp [ i ] ) && ( 0 == iTemp ) )
 				{
 //					cTemp [ i - 1 ] = '\0' ;
+					//Copy_Nto0 ( cTemp , pBookNode -> m_cName , iStartIndex , 0 , i - iStartIndex - 2 ) ;
 					Copy_Nto0 ( cTemp , cInfo , iStartIndex , 0 , i - iStartIndex - 2 ) ;
-					pBookTail -> m_pPrev -> m_cName = ( char * ) malloc ( sizeof ( char ) * strlen ( cInfo ) ) ;
-					strcpy ( pBookTail -> m_pPrev -> m_cName , cInfo ) ;
+					pBookNode -> m_cName = ( char * ) malloc ( sizeof ( char ) * ( strlen ( cInfo ) + 1 ) ) ;
+					strncpy ( pBookNode -> m_cName , cInfo , strlen ( cInfo ) ) ;
+					pBookNode -> m_cName [ strlen ( cInfo ) ] = '\0' ;
 					iStartIndex = i + 1 ;
 					++ iTemp ;
 					++ i ;
@@ -132,9 +147,11 @@ void File_Load ( FILE * fFile , int iFileCheck )
 				else if ( ( ' ' == cTemp [ i - 2 ] ) && ( '|' == cTemp [ i - 1  ] ) && ( ' ' == cTemp [ i ] ) && ( 1 == iTemp ) )
 				{
 //					cTemp [ i - 1 ] = '\0' ;
+					//Copy_Nto0 ( cTemp , pBookNode -> m_cPublisher , iStartIndex , 0 , i - iStartIndex - 2 ) ;
 					Copy_Nto0 ( cTemp , cInfo , iStartIndex , 0 , i - iStartIndex - 2 ) ;
-					pBookTail -> m_pPrev -> m_cPublisher = ( char * ) malloc ( sizeof ( char ) * strlen ( cInfo ) ) ;
-					strcpy ( pBookTail -> m_pPrev -> m_cPublisher , cInfo ) ;
+					pBookNode -> m_cPublisher = ( char * ) malloc ( sizeof ( char ) * ( strlen ( cInfo ) + 1 ) ) ;
+					strncpy ( pBookNode -> m_cPublisher , cInfo , strlen ( cInfo ) ) ;
+					pBookNode -> m_cPublisher [ strlen ( cInfo ) ] = '\0' ;
 					iStartIndex = i + 1 ;
 					++ iTemp ;
 					++ i ;
@@ -142,9 +159,11 @@ void File_Load ( FILE * fFile , int iFileCheck )
 				else if ( ( ' ' == cTemp [ i - 2 ] ) && ( '|' == cTemp [ i - 1  ] ) && ( ' ' == cTemp [ i ] ) && ( 2 == iTemp ) )
 				{
 //					cTemp [ i - 1 ] = '\0' ;
+					//Copy_Nto0 ( cTemp , pBookNode -> m_cAuthor , iStartIndex , 0 , i - iStartIndex - 2 ) ;
 					Copy_Nto0 ( cTemp , cInfo , iStartIndex , 0 , i - iStartIndex - 2 ) ;
-					pBookTail -> m_pPrev -> m_cAuthor = ( char * ) malloc ( sizeof ( char ) * strlen ( cInfo ) ) ;
-					strcpy ( pBookTail -> m_pPrev -> m_cAuthor , cInfo ) ;
+					pBookNode -> m_cAuthor = ( char * ) malloc ( sizeof ( char ) * ( strlen ( cInfo ) + 1 ) ) ;
+					strncpy ( pBookNode -> m_cAuthor , cInfo , strlen ( cInfo ) ) ;
+					pBookNode -> m_cAuthor [ strlen ( cInfo ) ] = '\0' ;
 					iStartIndex = i + 1 ;
 					++ iTemp ;
 					++ i ;
@@ -153,7 +172,10 @@ void File_Load ( FILE * fFile , int iFileCheck )
 				{
 //					cTemp [ i - 1 ] = '\0' ;
 					Copy_Nto0 ( cTemp , cInfo , iStartIndex , 0 , i - iStartIndex - 2 ) ;
-					pBookTail -> m_pPrev -> m_lISBN = atol ( cInfo ) ;
+					pBookNode -> m_cISBN = ( char * ) malloc ( sizeof ( char ) * ( strlen ( cInfo ) + 1 ) ) ;
+					strncpy ( pBookNode -> m_cISBN , cInfo , strlen ( cInfo ) ) ;
+					pBookNode -> m_cISBN [ strlen ( cInfo ) ] = '\0' ;
+					//pBookNode -> m_lISBN = atol ( cInfo ) ;
 					iStartIndex = i + 1 ;
 					++ iTemp ;
 					++ i ;
@@ -161,9 +183,11 @@ void File_Load ( FILE * fFile , int iFileCheck )
 				else if ( ( ' ' == cTemp [ i - 2 ] ) && ( '|' == cTemp [ i - 1  ] ) && ( ' ' == cTemp [ i ] ) && ( 4 == iTemp ) )
 				{
 //					cTemp [ i - 1 ] = '\0' ;
+					//Copy_Nto0 ( cTemp , pBookNode -> m_cHoldingInstitution , iStartIndex , 0 , i - iStartIndex - 2 ) ;
 					Copy_Nto0 ( cTemp , cInfo , iStartIndex , 0 , i - iStartIndex - 2 ) ;
-					pBookTail -> m_pPrev -> m_cHoldingInstitution = ( char * ) malloc ( sizeof ( char ) * strlen ( cInfo ) ) ;
-					strcpy ( pBookTail -> m_pPrev -> m_cHoldingInstitution , cInfo ) ;
+					pBookNode -> m_cHoldingInstitution = ( char * ) malloc ( sizeof ( char ) * ( strlen ( cInfo ) + 1 ) ) ;
+					strncpy ( pBookNode -> m_cHoldingInstitution , cInfo , strlen ( cInfo ) ) ;
+					pBookNode -> m_cHoldingInstitution [ strlen ( cInfo ) ] = '\0' ;
 					iStartIndex = i + 1 ;
 					++ iTemp ;
 					++ i ;
@@ -171,7 +195,7 @@ void File_Load ( FILE * fFile , int iFileCheck )
 				else if ( ( '\n' == cTemp [ i ] ) && ( 5 == iTemp ) )
 				{
 //					cTemp [ i - 1 ] = '\0' ;
-					pBookTail -> m_pPrev -> m_cBorrow = cTemp [ i - 1 ] ;
+					pBookNode -> m_cBorrow = cTemp [ i - 1 ] ;
 //					Copy_Nto0 ( cTemp , pClientTail -> m_cNumber , iStartIndex , 0 , i - iStartIndex ) ;
 //					iStartIndex = i + 1 ;
 //					++ iTemp ;
@@ -179,6 +203,17 @@ void File_Load ( FILE * fFile , int iFileCheck )
 				}
 			}
 
+
+			pBookSort = Sort_ISBN_Find_Book ( pBookNode ) ;
+
+			pBookSort -> m_pNext -> m_pPrev = pBookNode ;
+			pBookNode -> m_pNext = pBookSort -> m_pNext ;
+			pBookSort -> m_pNext = pBookNode ;
+			pBookNode -> m_pPrev = pBookSort ;
+
+//			pBookTail -> m_pPrev -> m_pNext -> m_pNext = pBookTail ;											// pNew -> m_pNext = pTail
+//			pBookTail -> m_pPrev -> m_pNext -> m_pPrev = pBookTail -> m_pPrev ;									// pNew -> m_pPrev = pNode
+//			pBookTail -> m_pPrev = pBookTail -> m_pPrev -> m_pNext ;											// pTail -> m_pPrev = pNew
 			
 			++ iBookCount ;
 		}
@@ -187,12 +222,14 @@ void File_Load ( FILE * fFile , int iFileCheck )
 	{
 		while ( ( NULL != fFile ) && ( fgets ( cTemp , 149 , fFile ) ) )
 		{
-			pBorrowTail -> m_pPrev -> m_pNext = ( Client * ) malloc ( sizeof ( Client ) ) ;							// pNode -> m_pNext = pNew
+			pBorrowNode = ( Borrow * ) malloc ( sizeof ( Borrow ) ) ;
+//			pBorrowTail -> m_pPrev -> m_pNext = ( Borrow * ) malloc ( sizeof ( Borrow ) ) ;							// pNode -> m_pNext = pNew
 
-
-			pBorrowTail -> m_pPrev -> m_pNext -> m_pNext = pBorrowTail ;											// pNew -> m_pNext = pTail
-			pBorrowTail -> m_pPrev -> m_pNext -> m_pPrev = pBorrowTail -> m_pPrev ;									// pNew -> m_pPrev = pNode
-			pBorrowTail -> m_pPrev = pBorrowTail -> m_pPrev -> m_pNext ;											// pTail -> m_pPrev = pNew
+			
+			pBorrowNode -> m_pNext = pBorrowTail ;											// pNew -> m_pNext = pTail
+			pBorrowNode -> m_pPrev = pBorrowTail -> m_pPrev ;								// pNew -> m_pPrev = pNode
+			pBorrowNode -> m_pPrev -> m_pNext = pBorrowNode ;								// pNode -> m_pNext = pNew
+			pBorrowTail -> m_pPrev = pBorrowNode ;											// pTail -> m_pPrev = pNew
 
 
 			Copy_Nto0 ( cTemp , cInfo , 0 , 0 , 8 ) ;
@@ -223,17 +260,18 @@ void File_Load ( FILE * fFile , int iFileCheck )
 				//																													type is time_t. Find it!!!!!!!!!!!!!!!!!!!!!
 //					cTemp [ i - 1 ] = '\0' ;
 					Copy_Nto0 ( cTemp , cInfo , iStartIndex , 0 , i - iStartIndex - 2 ) ;
-					pBorrowTail -> m_tBorrowDate = atol ( cInfo ) ;
+					pBorrowTail -> m_pPrev -> m_tBorrowDate = atol ( cInfo ) ;
 					iStartIndex = i + 1 ;
 					++ iTemp ;
 					++ i ;
 				}
-				else if ( ( ' ' == cTemp [ i - 2 ] ) && ( '|' == cTemp [ i - 1  ] ) && ( ' ' == cTemp [ i ] ) && ( 2 == iTemp ) )
+				else if ( ( '\n' == cTemp [ i ] ) && ( 2 == iTemp ) )
+//				else if ( ( ' ' == cTemp [ i - 2 ] ) && ( '|' == cTemp [ i - 1  ] ) && ( ' ' == cTemp [ i ] ) && ( 2 == iTemp ) )
 				{
 				//																													type is time_t. Find it!!!!!!!!!!!!!!!!!!!!!
 //					cTemp [ i - 1 ] = '\0' ;
-					Copy_Nto0 ( cTemp , cInfo , iStartIndex , 0 , i - iStartIndex - 2 ) ;
-					pBorrowTail -> m_tReturnDate = atol ( cInfo ) ;
+					Copy_Nto0 ( cTemp , cInfo , iStartIndex , 0 , i - iStartIndex ) ;
+					pBorrowTail -> m_pPrev -> m_tReturnDate = atol ( cInfo ) ;
 //					iStartIndex = i + 1 ;
 //					++ iTemp ;
 //					++ i ;
@@ -276,8 +314,8 @@ void File_Save ( FILE * fFile , int iFileCheck )
 		{
 			for ( i = 0 ; i < iBookCount ; ++i )
 			{
-				fprintf ( fFile , "%d | %s | %s | %s | %ld | %s | %c\n" , pBookNode -> m_iBookNum , pBookNode -> m_cName , pBookNode -> m_cPublisher ,
-																			pBookNode -> m_cAuthor , pBookNode -> m_lISBN , pBookNode -> m_cHoldingInstitution ,
+				fprintf ( fFile , "%d | %s | %s | %s | %s | %s | %c\n" , pBookNode -> m_iBookNum , pBookNode -> m_cName , pBookNode -> m_cPublisher ,
+																			pBookNode -> m_cAuthor , pBookNode -> m_cISBN , pBookNode -> m_cHoldingInstitution ,
 																			pBookNode -> m_cBorrow ) ;
 				pBookNode = pBookNode -> m_pNext ;
 			}
@@ -289,8 +327,12 @@ void File_Save ( FILE * fFile , int iFileCheck )
 		{
 			for ( i = 0 ; i < iBorrowCount ; ++i )
 			{
-				fprintf ( fFile , "%d | %d | %ld | %ld\n" , pBorrowNode -> m_iStudentNum , pBorrowNode -> m_iBookNum ,
-															pBorrowNode -> m_tBorrowDate , pBorrowNode -> m_tReturnDate ) ;
+				fprintf ( fFile , "%d | " , pBorrowNode -> m_iStudentNum ) ;
+				fprintf ( fFile , "%d | " , pBorrowNode -> m_iBookNum ) ;
+				fprintf ( fFile , "%ld | " , pBorrowNode -> m_tBorrowDate ) ;
+				fprintf ( fFile , "%ld\n" , pBorrowNode -> m_tReturnDate ) ;
+//				fprintf ( fFile , "%d | %d | %ld | %ld\n" , pBorrowNode -> m_iStudentNum , pBorrowNode -> m_iBookNum ,
+//															pBorrowNode -> m_tBorrowDate , pBorrowNode -> m_tReturnDate ) ;
 				//fprintf ( fFile , "%d | %d | %s | %s\n" , pNode -> m_iStudentNum , pNode -> m_cPassword ,
 				//											 pNode -> m_cName , pNode -> m_cAddress , pNode -> m_cNumber ) ;
 				// time_t. Check it!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -298,21 +340,16 @@ void File_Save ( FILE * fFile , int iFileCheck )
 			}
 		}
 	}
-	else if ( 4 == iFileCheck )
-	{
-		fprintf ( fFile , "\n%d | %s | %s | %s | %s\n" , pClientNode -> m_iStudentNum , pClientNode -> m_cPassword , pClientNode -> m_cName ,
-															pClientNode -> m_cAddress , pClientNode -> m_cNumber ) ;
-	}
-	else if ( 5 == iFileCheck )
-	{
-		fprintf ( fFile , "%d | %s | %s | %s | %ld | %s | %c\n" , pBookNode -> m_iBookNum , pBookNode -> m_cName , pBookNode -> m_cPublisher ,
-																	pBookNode -> m_cAuthor , pBookNode -> m_lISBN , pBookNode -> m_cHoldingInstitution ,
-																	pBookNode -> m_cBorrow ) ;
-	}
 	else
 	{
-		fprintf ( fFile , "%d | %d | %ld | %ld\n" , pBorrowNode -> m_iStudentNum , pBorrowNode -> m_iBookNum ,
-													pBorrowNode -> m_tBorrowDate , pBorrowNode -> m_tReturnDate ) ;
+		pBorrowNode = pBorrowTail -> m_pPrev ;
+
+		fprintf ( fFile , "%d | " , pBorrowNode -> m_iStudentNum ) ;
+		fprintf ( fFile , "%d | " , pBorrowNode -> m_iBookNum ) ;
+		fprintf ( fFile , "%ld | " , pBorrowNode -> m_tBorrowDate ) ;
+		fprintf ( fFile , "%ld\n" , pBorrowNode -> m_tReturnDate ) ;
+//		fprintf ( fFile , "%d | %d | %ld | %ld\n" , pBorrowNode -> m_iStudentNum , pBorrowNode -> m_iBookNum ,
+//													pBorrowNode -> m_tBorrowDate , pBorrowNode -> m_tReturnDate ) ;
 				//fprintf ( fFile , "%d | %d | %s | %s\n" , pNode -> m_iStudentNum , pNode -> m_cPassword ,
 				//											 pNode -> m_cName , pNode -> m_cAddress , pNode -> m_cNumber ) ;
 				// time_t. Check it!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -396,19 +433,49 @@ void Register_Member ()
 	Client * pNode = ( Client * ) malloc ( sizeof ( Client ) ) ;
 	Client * pSort = NULL ;
 	FILE * fClient = NULL ;
+	char cTemp [ 50 ] ;
 
 
 	printf ( "학번, 비밀번호, 이름, 주소 , 전화번호를 입력.\n" ) ;
 	printf ( "학번 : " ) ;
 	scanf ( "%d" , & pNode -> m_iStudentNum ) ;
+	fflush ( stdin ) ;
+	
 	printf ( "비밀번호 : " ) ;
-	scanf ( "%s" , pNode -> m_cPassword ) ;
+//	scanf ( "%s" , pNode -> m_cPassword ) ;
+	gets ( cTemp ) ;
+	fflush ( stdin ) ;
+	
+	pNode -> m_cPassword = ( char * ) malloc ( sizeof ( char ) * ( strlen ( cTemp ) + 1 ) ) ;
+	strncpy ( pNode -> m_cPassword , cTemp , strlen ( cTemp ) ) ;
+	pNode -> m_cPassword [ strlen ( cTemp ) ] = '\0' ;
+
 	printf ( "이름 : " ) ;
-	scanf ( "%s" , pNode -> m_cName ) ;
+//	scanf ( "%s" , pNode -> m_cName ) ;
+	gets ( cTemp ) ;
+	fflush ( stdin ) ;
+	
+	pNode -> m_cName = ( char * ) malloc ( sizeof ( char ) * ( strlen ( cTemp ) + 1 ) ) ;
+	strncpy ( pNode -> m_cName , cTemp , strlen ( cTemp ) ) ;
+	pNode -> m_cName [ strlen ( cTemp ) ] = '\0' ;
+
 	printf ( "주소 : " ) ;
-	scanf ( "%s" , pNode -> m_cAddress ) ;
+//	scanf ( "%s" , pNode -> m_cAddress ) ;
+	gets ( cTemp ) ;
+	fflush ( stdin ) ;
+	
+	pNode -> m_cAddress = ( char * ) malloc ( sizeof ( char ) * ( strlen ( cTemp ) + 1 ) ) ;
+	strncpy ( pNode -> m_cAddress , cTemp , strlen ( cTemp ) ) ;
+	pNode -> m_cAddress [ strlen ( cTemp ) ] = '\0' ;
+
 	printf ( "전화번호 : " ) ;
-	scanf ( "%s" , pNode -> m_cNumber ) ;
+//	scanf ( "%s" , pNode -> m_cNumber ) ;
+	gets ( cTemp ) ;
+	fflush ( stdin ) ;
+	
+	pNode -> m_cNumber = ( char * ) malloc ( sizeof ( char ) * ( strlen ( cTemp ) + 1 ) ) ;
+	strncpy ( pNode -> m_cNumber , cTemp , strlen ( cTemp ) ) ;
+	pNode -> m_cNumber [ strlen ( cTemp ) ] = '\0' ;
 
 
 	pSort = Sort_StudentNum_Find_Member ( pNode ) ;
@@ -433,7 +500,7 @@ void Register_Member ()
 		
 
 		fClient = fopen ( "Client.txt" , "a" ) ;
-		File_Save ( fClient , 4 ) ;
+		File_Save ( fClient , 1 ) ;
 		fclose ( fClient ) ;
 
 
@@ -558,35 +625,70 @@ void Register_Book ()
 	Book * pNode = ( Book * ) malloc ( sizeof ( Book ) ) ;
 	Book * pSort = NULL ;
 	FILE * fBook = NULL ;
+	char cTemp [ 50 ] ;
 
 	printf ( "도서명, 출판사, 저자명, ISBN , 소장처 입력.\n" ) ;
 	printf ( "도서명 : " ) ;
-	scanf ( "%s" , pNode -> m_cName ) ;
+//	scanf ( "%s" , cTemp ) ;
+	gets ( cTemp ) ;
+	fflush ( stdin ) ;
+	
+	pNode -> m_cName = ( char * ) malloc ( sizeof ( char ) * ( strlen ( cTemp ) + 1 ) ) ;
+	strncpy ( pNode -> m_cName , cTemp , strlen ( cTemp ) ) ;
+	pNode -> m_cName [ strlen ( cTemp ) ] = '\0' ;
+
 	printf ( "출판사 : " ) ;
-	scanf ( "%s" , pNode -> m_cPublisher ) ;
+//	scanf ( "%s" , cTemp ) ;
+	gets ( cTemp ) ;
+	fflush ( stdin ) ;
+
+	pNode -> m_cPublisher = ( char * ) malloc ( sizeof ( char ) * ( strlen ( cTemp ) + 1 ) ) ;
+	strncpy ( pNode -> m_cPublisher , cTemp , strlen ( cTemp ) ) ;
+	pNode -> m_cPublisher [ strlen ( cTemp ) ] = '\0' ;
+
 	printf ( "저자명 : " ) ;
-	scanf ( "%s" , pNode -> m_cAuthor ) ;
+//	scanf ( "%s" , cTemp ) ;
+	gets ( cTemp ) ;
+	fflush ( stdin ) ;
+
+	pNode -> m_cAuthor = ( char * ) malloc ( sizeof ( char ) * ( strlen ( cTemp ) + 1 ) ) ;
+	strncpy ( pNode -> m_cAuthor , cTemp , strlen ( cTemp ) ) ;
+	pNode -> m_cAuthor [ strlen ( cTemp ) ] = '\0' ;
+
 	printf ( "ISBN : " ) ;
-	scanf ( "%ld" , & pNode -> m_lISBN ) ;
+//	scanf ( "%s" , cTemp ) ;
+	gets ( cTemp ) ;
+	fflush ( stdin ) ;
+
+	pNode -> m_cISBN = ( char * ) malloc ( sizeof ( char ) * ( strlen ( cTemp ) + 1 ) ) ;
+	strncpy ( pNode -> m_cISBN , cTemp , strlen ( cTemp ) ) ;
+	pNode -> m_cISBN [ strlen ( cTemp ) ] = '\0' ;
+
 	printf ( "소장처 : " ) ;
-	scanf ( "%s" , pNode -> m_cHoldingInstitution ) ;
+//	scanf ( "%s" , cTemp ) ;
+	gets ( cTemp ) ;
+	fflush ( stdin ) ;
+
+	pNode -> m_cHoldingInstitution = ( char * ) malloc ( sizeof ( char ) * ( strlen ( cTemp ) + 1 ) ) ;
+	strncpy ( pNode -> m_cHoldingInstitution , cTemp , strlen ( cTemp ) ) ;
+	pNode -> m_cHoldingInstitution [ strlen ( cTemp ) ] = '\0' ;
 
 
 	pSort = Sort_ISBN_Find_Book ( pNode ) ;
 	
 	
-/*	if ( NULL == pSort )
+	if ( NULL == pSort )
 	{
 		free ( pNode ) ;
 		
 		printf ( "Same Student Number. Register failed.\n" ) ;
-	} */
+	}
 	if ( NULL != pSort )									// Why?
 	{
 //		Remove_Line_Escape_Sequence ( pNode ) ;
 
-		pSort -> m_cBorrow = 'Y' ;
-		pSort -> m_iBookNum = iBookNum + 1 ;
+		pNode -> m_cBorrow = 'Y' ;
+		pNode -> m_iBookNum = iBookNum + 1 ;
 		++ iBookNum ;
 		pSort -> m_pNext -> m_pPrev = pNode ;
 		pNode -> m_pNext = pSort -> m_pNext ;
@@ -597,7 +699,7 @@ void Register_Book ()
 
 
 		fBook = fopen ( "Book.txt" , "a" ) ;
-		File_Save ( fBook , 5 ) ;
+		File_Save ( fBook , 2 ) ;
 		fclose ( fBook ) ;
 
 
@@ -616,15 +718,30 @@ void Register_Book ()
  */
 Book * Sort_ISBN_Find_Book ( Book * pNode )
 {
-	Book * pSort = pClientHead ;
-	long lSortISBN = 0 ;
-	long lNodeISBN = pNode -> m_lISBN ;
+	Book * pSort = pBookHead ;
+	char cSortISBN [ 14 ] ;
+	char cNodeISBN [ 14 ] ;
+	char cTemp [ 8 ] ;
+	int iSortISBN = 0 ;
+	int iNodeISBN = 0 ;
+//	long lSortISBN = 0 ;
+//	long lNodeISBN = pNode -> m_lISBN ;
+
+	strcpy ( cNodeISBN , pNode -> m_cISBN ) ;
 
 
 	while ( pSort -> m_pNext != pBookTail )
 	{
 		pSort = pSort -> m_pNext ;
-		lSortISBN = pSort -> m_lISBN ;
+		strcpy ( cSortISBN , pSort -> m_cISBN ) ;
+
+		strncpy ( cTemp , cSortISBN , 7 ) ;
+		cTemp [ 7 ] = '\0' ;
+		iSortISBN = atoi ( cTemp ) ;
+		strncpy ( cTemp , cNodeISBN , 7 ) ;
+		cTemp [ 7 ] = '\0' ;
+		iNodeISBN = atoi ( cTemp ) ;
+		//lSortISBN = pSort -> m_lISBN ;
 
 		
 /*		if ( lNodeISBN == lSortISBN )
@@ -633,14 +750,28 @@ Book * Sort_ISBN_Find_Book ( Book * pNode )
 
 			break ;
 		} */
-		if ( lSortISBN > lNodeISBN )			// SortISBN is 20160805111 , NodeNumber is 20160805112
+		if ( iSortISBN > iNodeISBN )			// SortISBN is 20160805111 , NodeNumber is 20160805112
 		{
 			pSort = pSort -> m_pPrev ;
 
 			break ;
 		}
+		else if ( iSortISBN == iNodeISBN )
+		{
+			Copy_Nto0 ( cSortISBN , cTemp , 7 , 0 , 7 ) ;
+			iSortISBN = atoi ( cTemp ) ;
+			Copy_Nto0 ( cNodeISBN , cTemp , 7 , 0 , 7 ) ;
+			iNodeISBN = atoi ( cTemp ) ;
+
+			if ( iSortISBN > iNodeISBN )
+			{
+				pSort = pSort -> m_pPrev ;
+
+				break ;
+			}
+		}
 	}
-	
+
 	
 	return pSort ;
 }
@@ -662,15 +793,21 @@ void Eliminate_Book ()
 	printf ( "2. ISBN\n" ) ;
 
 	scanf ( "%d" , & iMenu ) ;
+	
+	fflush ( stdin ) ;
 
 
-	pNode = Search_Book ( iMenu ) ;
+	if ( 2 == iMenu )
+		iMenu = 3 ;
+
+
+	pNode = Search_Book ( iMenu , true ) ;
 	
 	
 	if ( NULL != pNode )
 	{
 		Print_Book_Information ( pNode ) ;
-		pNode = Search_Book ( 5 ) ;
+		pNode = Search_Book ( 5 , true ) ;
 	}
 
 
@@ -767,15 +904,25 @@ void Borrow_Book ()
 	printf ( "1. Name\t" ) ;
 	printf ( "2. ISBN\n" ) ;
 
+	printf ( "Input Menu : " ) ;
+
 	scanf ( "%d" , & iMenu ) ;
 
+	if ( 2 == iMenu )
+		iMenu = 3 ;
+	
+	fflush ( stdin ) ;
 
-	pBookNode = Search_Book ( iMenu ) ;
+
+	pBookNode = Search_Book ( iMenu , true ) ;
 	
 	
 	if ( NULL != pBookNode )
 	{
 		Print_Book_Information ( pBookNode ) ;
+
+		pClientNode = pClientHead ;
+		pBookNode = pBookHead ;
 
 		printf ( "Student Number : " ) ;
 		scanf ( "%d" , & iStudentNum ) ;
@@ -791,7 +938,7 @@ void Borrow_Book ()
 			if ( pClientNode -> m_iStudentNum == iStudentNum )
 				break ;
 		}
-		while ( pBookNode -> m_pNext != pClientTail )
+		while ( pBookNode -> m_pNext != pBookTail )
 		{
 			pBookNode = pBookNode -> m_pNext ;
 
@@ -801,11 +948,11 @@ void Borrow_Book ()
 		}
 
 
-		if ( pClientNode -> m_pNext == pClientTail )
+		if ( pClientNode -> m_iStudentNum != iStudentNum )
 		{
 			printf ( "Client doesn't exist.\n" ) ;
 		}
-		else if ( pBookNode -> m_pNext == pBookTail )
+		else if ( pBookNode -> m_iBookNum != iTempBookNum )
 		{
 			printf ( "Book doesn't exist.\n" ) ;
 		}
@@ -836,11 +983,11 @@ void Borrow_Book ()
 
 
 			fBorrow = fopen ( "Borrow.txt" , "a" ) ;
-			File_Save ( fBorrow , 6 ) ;
+			File_Save ( fBorrow , 0 ) ;
 			fclose ( fBorrow ) ;
 
 
-			free ( pBorrowNode ) ;
+//			free ( pBorrowNode ) ;
 		}
 	}
 }
@@ -852,11 +999,12 @@ void Borrow_Book ()
  */
 time_t Set_Return_Date ( time_t tTime )
 {
-	char cTemp [ 26 ] ;
+	char cTemp [ 40 ] ;
 
 
 	tTime += TIME_T_SECOND_30DAY ;
-	strncpy ( cTemp , ctime ( tTime ) , 26 ) ;
+	//strncpy ( cTemp , ctime ( tTime ) , 26 ) ;
+	strcpy ( cTemp , ctime ( & tTime ) ) ;
 	
 	
 	if ( ( 'S' == cTemp [ 23 ] ) && ( 'U' == cTemp [ 24 ] ) && ( 'N' == cTemp [ 25 ] ) )
@@ -873,7 +1021,7 @@ time_t Set_Return_Date ( time_t tTime )
 void Return_Book ()
 {
 	int iStudentNum = 0 ;
-	int * irgBookNum = NULL ;
+	int ** irgBookNum = NULL ;
 	int iTemp = 0 ;
 	int i = 0 ;
 	char cTemp ;
@@ -911,7 +1059,7 @@ void Return_Book ()
 		irgBookNum = ( int * ) malloc ( iStudentBorrow * sizeof ( int ) ) ;
 
 
-		while ( i != iStudentNum )
+		while ( i != iStudentBorrow )
 		{
 			if ( pBorrowTail == pBorrowNode -> m_pNext )
 			{
@@ -927,13 +1075,16 @@ void Return_Book ()
 			{
 				while ( pBookTail != pBookHead -> m_pNext )
 				{
+					pBookNode = pBookNode -> m_pNext ;
+
+
 					if ( pBorrowNode -> m_iBookNum == pBookNode -> m_iBookNum )
 						break ;
 				}
 
 
 				Print_Borrow_Information ( pBorrowNode , pBookNode ) ;
-				irgBookNum [ i ] = pBorrowNode -> m_iStudentNum ;
+				irgBookNum [ i ] = pBorrowNode -> m_iBookNum ;
 				++i ;
 			}
 		}
@@ -941,6 +1092,9 @@ void Return_Book ()
 
 		printf ( "Input returning book number : " ) ;
 		scanf ( "%d" , & iTemp ) ;
+		fflush ( stdin ) ;
+
+		i = 0 ;
 
 
 		while ( iTemp != irgBookNum [ i ] )
@@ -977,6 +1131,7 @@ void Return_Book ()
 			}
 		}
 
+
 		free ( irgBookNum ) ;
 	}
 }
@@ -989,18 +1144,23 @@ void Return_Book ()
 Client * Search_Client ()
 {
 	int iMenu = 0 ;
-	char * cName = NULL ;
+	char cName [ 20 ] ;
 	int iTempStudentNum ;
 	Client * pNode = pClientHead ;
 
 
 	while ( 4 != iMenu )
 	{
+		pNode = pClientHead ;
+
+
 		printf ( "1. Name Search\t" ) ;
 		printf ( "2. Student Number Search\n" ) ;
 		printf ( "3. All Search\t" ) ;
-		printf ( "4. Previous Menu\n" ) ;
-		
+		printf ( "4. Previous Menu\n\n" ) ;
+		printf ( "Input Menu : " ) ;
+
+
 		scanf ( "%d" , & iMenu ) ;
 
 
@@ -1020,7 +1180,10 @@ Client * Search_Client ()
 			}
 
 
-			Print_User ( pNode ) ;
+			if ( pClientTail != pNode -> m_pNext )
+				Print_User ( pNode ) ;
+			else
+				printf ( "There's no user name %s\n" , cName ) ;
 		}
 		else if ( 2 == iMenu )
 		{
@@ -1049,7 +1212,7 @@ Client * Search_Client ()
 				Print_User ( pNode ) ;
 			}
 		}
-		else if ( 5 != iMenu )
+		else if ( 4 != iMenu )
 		{
 			printf ( "Wrong menu. Try again.\n" ) ;
 		}
@@ -1061,38 +1224,48 @@ Client * Search_Client ()
  * Search Specific Book.
  * Name, ISBN, Publisher, Author, BookNumber
  */
-Book * Search_Book ( int iMenu )
+Book * Search_Book ( int iMenu , bool bReturn )
 {
-	char * cName = NULL ;
-	long lISBN = 0 ;
-	char * cPublisher = NULL ;
-	char * cAuthor = NULL ;
+	char cName [ 25 ] ;
+	char cISBN [ 14 ] ;
+	//long lISBN = 0 ;
+	char cPublisher [ 25 ] ;
+	char cAuthor [ 15 ] ;
 	int iBookNum = 0 ;
 	Book * pNode = pBookHead ;
 
 
-	if ( ! iMenu )
+	while ( 6 != iMenu )
 	{
-		printf ( "1. Name\t" ) ;
-		printf ( "2. ISBN\n" ) ;
-		printf ( "3. Publisher\t" ) ;
-		printf ( "4. Author\n" ) ;
+		pNode = pBookHead ;
 
-		scanf ( "%d" , & iMenu ) ;
-
-		//도서명 ISBN 출판사 저자명 도서번호
-	}
-
-
-	if ( 1 == iMenu )	// Name
-	{
-		printf ( "Input Book Name : " ) ;
-		scanf ( "%s" , cName ) ;
-
-
-		while ( pNode -> m_pNext != pBookTail )
+		if ( ! bReturn )
 		{
-			pNode = pNode -> m_pNext ;
+			printf ( "1. Name\t" ) ;
+			printf ( "2. Publisher\n" ) ;
+			printf ( "3. ISBN\t" ) ;
+			printf ( "4. Author\n" ) ;
+			printf ( "5. All Search\t" ) ;
+			printf ( "6. Previous Menu\n\n" ) ;
+			printf ( "Input Menu : " ) ;
+
+
+			scanf ( "%d" , & iMenu ) ;
+			fflush ( stdin ) ;
+		}
+
+
+		if ( 1 == iMenu )	// Name
+		{
+			printf ( "Input Book Name : " ) ;
+
+			gets ( cName ) ;
+			fflush ( stdin ) ;
+
+
+			while ( pNode -> m_pNext != pBookTail )
+			{
+				pNode = pNode -> m_pNext ;
 
 		
 /*			if ( lNodeISBN == lSortISBN )
@@ -1101,87 +1274,152 @@ Book * Search_Book ( int iMenu )
 
 				break ;
 			} */
-			if ( ! strcmp ( cName , pNode -> m_cName ) )			// SortISBN is 20160805111 , NodeNumber is 20160805112
-			{
-				break ;
+				if ( ! strcmp ( cName , pNode -> m_cName ) )			// SortISBN is 20160805111 , NodeNumber is 20160805112
+				{
+					break ;
+				}
 			}
 		}
-	}
-	else if ( 2 == iMenu ) // ISBN
-	{
-		printf ( "Input ISBN : " ) ;
-		scanf ( "ld" , & lISBN ) ;
-
-
-		while ( pNode -> m_pNext != pBookTail )
+		
+		else if ( 2 == iMenu ) // Publisher
 		{
-			pNode = pNode -> m_pNext ;
+			printf ( "Input Publisher : " ) ;
+
+			gets ( cPublisher ) ;
+			fflush ( stdin ) ;
+
+			//scanf ( "%s" , cPublisher ) ;
 
 
-			if ( lISBN == pNode -> m_lISBN )
+			while ( pNode -> m_pNext != pBookTail )
 			{
-				break ;
+				pNode = pNode -> m_pNext ;
+
+
+				if ( ! strcmp ( cPublisher , pNode -> m_cPublisher ) )
+				{
+					break ;
+
+				}
 			}
 		}
-	}
-	else if ( 3 == iMenu ) // Publisher
-	{
-		printf ( "Input Publisher : " ) ;
-		scanf ( "%s" , cPublisher ) ;
-
-
-		while ( pNode -> m_pNext != pBookTail )
+		else if ( 3 == iMenu ) // ISBN
 		{
-			pNode = pNode -> m_pNext ;
+			printf ( "Input ISBN : " ) ;
+			//scanf ( "%ld" , & lISBN ) ;
+			scanf ( "%s" , cISBN ) ;
+			fflush ( stdin ) ;
 
 
-			if ( ! strcmp ( cPublisher , pNode -> m_cPublisher ) )
+			while ( pNode -> m_pNext != pBookTail )
 			{
-				break ;
+				pNode = pNode -> m_pNext ;
+
+
+				if ( ! strcmp ( cISBN , pNode -> m_cISBN ) )
+				{
+					break ;
+				}
 			}
 		}
-	}
-	else if ( 4 == iMenu ) // Author
-	{
-		printf ( "Input Author : " ) ;
-		scanf ( "%s" , cAuthor ) ;
-
-
-		while ( pNode -> m_pNext != pBookTail )
+		else if ( 4 == iMenu ) // Author
 		{
-			pNode = pNode -> m_pNext ;
+			printf ( "Input Author : " ) ;
+
+			gets ( cAuthor ) ;
+			fflush ( stdin ) ;
+
+			//scanf ( "%s" , cAuthor ) ;
 
 
-			if ( ! strcmp ( cAuthor , pNode -> m_cAuthor ) )
+			while ( pNode -> m_pNext != pBookTail )
 			{
-				break ;
+				pNode = pNode -> m_pNext ;
+
+
+				if ( ! strcmp ( cAuthor , pNode -> m_cAuthor ) )
+				{
+					break ;
+				}
 			}
 		}
-	}
-	else
-	{
-		printf ( "Input Book Num : " ) ;
-		scanf ( "%d" , & iBookNum ) ;
-
-
-		while ( pNode -> m_pNext != pBookTail )
+		else if ( 5 == iMenu )	// BookNumber
 		{
-			pNode = pNode -> m_pNext ;
+			printf ( "Input BookNumber : " ) ;
+
+			scanf ( "%d" , & iBookNum ) ;
+			fflush ( stdin ) ;
+
+			//scanf ( "%s" , cAuthor ) ;
 
 
-			if ( iBookNum == pNode -> m_iBookNum )
+			while ( pNode -> m_pNext != pBookTail )
 			{
-				break ;
+				pNode = pNode -> m_pNext ;
+
+
+				if ( iBookNum == pNode -> m_iBookNum )
+				{
+					break ;
+				}
 			}
 		}
+		/*else if ( 5 == iMenu )
+		{
+			while ( pBookTail != pNode -> m_pNext )
+			{
+				pNode = pNode -> m_pNext ;
+
+				Print_Book_Information ( pNode ) ;
+			}
+		
+			pNode = pBookHead ;
+		}*/
+		else if ( 6 == iMenu )
+		{
+			break ;
+		}
+		else
+		{
+			printf ( "Wrong menu. Try again.\n" ) ;
+		}
+
+		/*else
+		{
+			printf ( "Input Book Num : " ) ;
+			scanf ( "%d" , & iBookNum ) ;
+
+
+			while ( pNode -> m_pNext != pBookTail )
+			{
+				pNode = pNode -> m_pNext ;
+
+
+				if ( iBookNum == pNode -> m_iBookNum )
+				{
+					break ;
+				}
+			}
+		}*/
+
+		if ( pNode -> m_pNext == pBookTail )
+			pNode = NULL ;
+		else if ( ! bReturn )
+			Print_Book_Information ( pNode ) ;
+		else
+			return pNode ;
 	}
+	//if ( ! iMenu )
+	//{
+	//	printf ( "1. Name\t" ) ;
+	//	printf ( "2. ISBN\n" ) ;
+	//	printf ( "3. Publisher\t" ) ;
+	//	printf ( "4. Author\n" ) ;
 
+	//	scanf ( "%d" , & iMenu ) ;
 
-	if ( pNode -> m_pNext == pBookTail )
-		pNode = NULL ;
-
-
-	return pNode ;
+	//	//도서명 ISBN 출판사 저자명 도서번호
+	//}
 }
 
 
@@ -1267,13 +1505,40 @@ void My_Borrow_List ()
  */
 void Modify_Member ()
 {
+	char cTemp [ 50 ] ;
+	FILE * fClient = NULL ;
+
+
 	printf ( "Modify information except student number, and name.\n" ) ;
 	printf ( "Password : " ) ;
-	scanf ( "%s" , pUser -> m_cPassword ) ;
+//	scanf ( "%s" , pUser -> m_cPassword ) ;
+	gets ( cTemp ) ;
+	fflush ( stdin ) ;
+	
+	strncpy ( pUser -> m_cPassword , cTemp , strlen ( cTemp ) ) ;
+	pUser -> m_cPassword [ strlen ( cTemp ) ] = '\0' ;
+
 	printf ( "Address : " ) ;
-	scanf ( "%s" , pUser -> m_cAddress ) ;
+//	scanf ( "%s" , pUser -> m_cAddress ) ;
+	gets ( cTemp ) ;
+	fflush ( stdin ) ;
+	
+	strncpy ( pUser -> m_cAddress , cTemp , strlen ( cTemp ) ) ;
+	pUser -> m_cAddress [ strlen ( cTemp ) ] = '\0' ;
+
 	printf ( "Phone Number : " ) ;
-	scanf ( "%s" , pUser -> m_cNumber ) ;
+//	scanf ( "%s" , pUser -> m_cNumber ) ;
+	gets ( cTemp ) ;
+	fflush ( stdin ) ;
+	
+	strncpy ( pUser -> m_cNumber , cTemp , strlen ( cTemp ) ) ;
+	pUser -> m_cNumber [ strlen ( cTemp ) ] = '\0' ;
+
+
+	fClient = fopen ( "Client.txt" , "w+" ) ;
+	File_Save ( fClient , 1 ) ;
+	fclose ( fClient ) ;
+
 
 	printf ( "Modify End.\n" ) ;
 }
@@ -1306,6 +1571,10 @@ void Quit_Member ()
 		pEliNext -> m_pPrev = pEliPrev ;
 		-- iClientCount ;
 
+		free ( pUser -> m_cAddress ) ;
+		free ( pUser -> m_cName ) ;
+		free ( pUser -> m_cNumber ) ;
+		free ( pUser -> m_cPassword ) ;
 
 		free ( pUser ) ;
 
@@ -1333,7 +1602,7 @@ void Print_User ( Client * pNode )
 {
 	if ( NULL != pNode )
 	{
-		printf ( "Student Number : %d\n" , pNode -> m_iStudentNum ) ;
+		printf ( "\nStudent Number : %d\n" , pNode -> m_iStudentNum ) ;
 		printf ( "Name : %s\n" , pNode -> m_cName ) ;
 		printf ( "Address : %s\n" , pNode -> m_cAddress ) ;
 		printf ( "Phone Number : %s\n" , pNode -> m_cNumber ) ;
@@ -1353,7 +1622,7 @@ void Print_Book_Information ( Book * pNode )
 		printf ( "Book Name : %s\n" , pNode -> m_cName ) ;
 		printf ( "Publisher : %s\n" , pNode -> m_cPublisher ) ;
 		printf ( "Author : %s\n" , pNode -> m_cAuthor ) ;
-		printf ( "ISBN : %ld\n" , pNode -> m_lISBN ) ;
+		printf ( "ISBN : %s\n" , pNode -> m_cISBN ) ;
 		printf ( "Holding Institution : %s\n" , pNode -> m_cHoldingInstitution ) ;
 		printf ( "Eliminate or Borrow Possbile : %c\n" , pNode -> m_cBorrow ) ;	
 	}
@@ -1389,36 +1658,41 @@ void All_free ()
 	Borrow * pBorrowNode = pBorrowHead ;
 
 
-	while ( pClientTail != pClientNode )
+	while ( pClientTail != ( pClientNode -> m_pNext ) )
+	//while ( pClientTail != pClientNode )
 	{
+		pClientNode = pClientNode -> m_pNext ;
+
 		free ( pClientNode -> m_cAddress ) ;
 		free ( pClientNode -> m_cName ) ;
 		free ( pClientNode -> m_cNumber ) ;
 		free ( pClientNode -> m_cPassword ) ;
 
-		pClientNode = pClientNode -> m_pNext ;
-
 		free ( pClientNode -> m_pPrev ) ;
 	}
-	while ( pBookTail != pBookNode )
+	while ( pBookTail != ( pBookNode -> m_pNext ) )
+	//while ( pBookTail != pBookNode )
 	{
+		pBookNode = pBookNode -> m_pNext ;
+
 		free ( pBookNode -> m_cAuthor ) ;
 		free ( pBookNode -> m_cHoldingInstitution ) ;
 		free ( pBookNode -> m_cName ) ;
 		free ( pBookNode -> m_cPublisher ) ;
 
-		pBookNode = pBookNode -> m_pNext ;
-
 		free ( pBookNode -> m_pPrev ) ;
 	}
-	while ( pBorrowTail != pBorrowNode )
+	while ( pBorrowTail != ( pBorrowNode -> m_pNext ) )
 	{
 		pBorrowNode = pBorrowNode -> m_pNext ;
 
 		free ( pBorrowNode -> m_pPrev ) ;
 	}
 
+	free ( pClientNode -> m_pNext ) ;
 	free ( pClientNode ) ;
+	free ( pBookNode -> m_pNext ) ;
 	free ( pBookNode ) ;
-	free ( pBorrowNode ) ;
+	free ( pBorrowNode -> m_pNext ) ;
+//	free ( pBorrowNode ) ;
 }

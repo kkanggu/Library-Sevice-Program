@@ -21,8 +21,13 @@ typedef struct Book
 	char * m_cName ;
 	char * m_cPublisher ;
 	char * m_cAuthor ;
-	long m_lISBN ;
+	/*char m_cName [ 25 ] ;
+	char m_cPublisher [ 25 ] ;
+	char m_cAuthor [ 15 ] ;*/
+	char * m_cISBN ;
+	//long m_lISBN ;
 	char * m_cHoldingInstitution ;
+	//char m_cHoldingInstitution [ 20 ] ;
 	char m_cBorrow ;
 
 	struct Book * m_pPrev ;

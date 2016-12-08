@@ -28,8 +28,8 @@ void BookNumber_ReSetting () ;
 void Borrow_Book () ;
 time_t Set_Return_Date ( time_t tTime ) ;
 void Return_Book () ;
-Book * Search_Book ( int iMenu ) ;
 Client * Search_Client () ;
+Book * Search_Book ( int iMenu, bool bReturn ) ;
 void Logout_Member () ;
 void Program_End () ;
 void My_Borrow_List () ;
@@ -42,14 +42,14 @@ void Print_Borrow_Information ( Borrow * pBorrowNode , Book * pBookNode ) ;
 void All_free () ;
 
 
-Client * pClientHead	;
+Client * pClientHead ;
 Client * pClientTail ;
 Book * pBookHead ;
 Book * pBookTail ;
 Borrow * pBorrowHead ;
 Borrow * pBorrowTail ;
 
-static Client * pUser = NULL ;				// Login. NULL is noOne, ClientHead is admin. Other people, that people login.
+//static Client * pUser = NULL ;				// Login. NULL is noOne, ClientHead is admin. Other people, that people login.
 
 
 
